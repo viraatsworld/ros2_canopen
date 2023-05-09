@@ -668,6 +668,8 @@ bool NodeCanopen402Driver<NODETYPE>::set_target(double target)
       scaled_target = target;
     }
     // RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", scaled_target);
+    TRACEPOINT(
+      canopen_ros2_control_target_position, this->node_->get_name(), this->node_id_, scaled_target);
     return motor_->setTarget(scaled_target);
   }
   else

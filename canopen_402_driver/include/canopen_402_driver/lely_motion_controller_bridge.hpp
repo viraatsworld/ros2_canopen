@@ -9,6 +9,8 @@
 #include "canopen_402_driver/base.hpp"
 #include "canopen_base_driver/lely_driver_bridge.hpp"
 
+#include "tracetools/tracetools.h"
+
 using namespace ros2_canopen;
 namespace ros2_canopen
 {
@@ -33,6 +35,8 @@ class LelyMotionControllerBridge : public LelyDriverBridge
 {
 private:
   std::vector<std::shared_ptr<RemoteObject>> objs;
+  uint8_t node_id_;
+  std::string node_name_;
   bool sync;
   double speed;
   double position;
@@ -129,6 +133,7 @@ public:
     {
       this->tpdo_mapped[obj->index][obj->subindex] = data;
       this->tpdo_mapped[obj->index][obj->subindex].WriteEvent();
+      TRACEPOINT(canopen_tpdo_data, node_name_.c_str(), node_id_, data);
     }
   }
   /**
