@@ -133,7 +133,10 @@ public:
     {
       this->tpdo_mapped[obj->index][obj->subindex] = data;
       this->tpdo_mapped[obj->index][obj->subindex].WriteEvent();
-      TRACEPOINT(canopen_tpdo_data, node_name_.c_str(), node_id_, data);
+      if (obj->index == 0x60C1 && obj->subindex == 0x01)
+      {
+        TRACEPOINT(canopen_tpdo_data, node_name_.c_str(), node_id_, data);
+      }
     }
   }
   /**

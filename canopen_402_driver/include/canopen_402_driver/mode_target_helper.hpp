@@ -22,7 +22,11 @@ class ModeTargetHelper : public Mode
   std::atomic<bool> has_target_;
 
 public:
-  ModeTargetHelper(uint16_t mode) : Mode(mode) {}
+  ModeTargetHelper(uint16_t mode) : Mode(mode)
+  {
+    has_target_ = false;
+    target_ = std::numeric_limits<T>::quiet_NaN();
+  }
   bool hasTarget() { return has_target_; }
   T getTarget() { return target_; }
   virtual bool setTarget(const double & val)
