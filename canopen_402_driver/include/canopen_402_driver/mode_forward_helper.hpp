@@ -25,7 +25,12 @@ public:
     if (this->hasTarget())
     {
       cw = cw.get() | CW_MASK;
-
+      if (std::isnan(this->getTarget()))
+      {
+        RCLCPP_INFO(
+          rclcpp::get_logger("canopen_402_target"),
+          "Target command is not a number from forward helper");
+      }
       driver->universal_set_value<TYPE>(OBJ, SUB, this->getTarget());
       return true;
     }

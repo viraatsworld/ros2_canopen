@@ -4,6 +4,8 @@
 #include "canopen_402_driver/node_interfaces/node_canopen_402_driver.hpp"
 #include "canopen_core/driver_error.hpp"
 
+#include "tracetools/tracetools.h"
+
 #include <optional>
 
 using namespace ros2_canopen::node_interfaces;
@@ -622,6 +624,12 @@ bool NodeCanopen402Driver<NODETYPE>::set_target(double target)
       scaled_target = target;
     }
     // RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", scaled_target);
+    if (!std::isnan(scaled_target))
+    {
+      TRACEPOINT(
+        canopen_ros2_control_target_position, this->node_->get_name(), this->node_id_,
+        scaled_target);
+    }
     return motor_->setTarget(scaled_target);
   }
   else

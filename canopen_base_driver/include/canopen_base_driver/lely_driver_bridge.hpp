@@ -838,11 +838,11 @@ public:
       this->dictionary_->setVal<T>(index, subindex, value);
       this->tpdo_mapped[index][subindex] = value;
       this->tpdo_mapped[index][subindex].WriteEvent();
-      // if (index == 0x607A && subindex == 0x00)
-      // {
-      //   // std::cout << "TPDO Mapped: " << value << std::endl;
-      //   // TRACEPOINT(canopen_tpdo_data, name_.c_str(), nodeid, value);
-      // }
+      if (index == 0x60C1 && subindex == 0x01)
+      {
+        // std::cout << "TPDO Mapped: " << value << std::endl;
+        TRACEPOINT(canopen_tpdo_data, name_.c_str(), nodeid, value);
+      }
     }
     else
     {
