@@ -1,0 +1,9 @@
+[submodule "prbt_robot"]
+	path = prbt_robot
+	url = https://github.com/ipa-vsp/prbt_robot.git
+[submodule "ros2_tracing"]
+	path = ros2_tracing
+	url = https://github.com/ipa-vsp/ros2_tracing.git
+[submodule "tracetools_analysis"]
+	path = tracetools_analysis
+	url = https://github.com/ipa-vsp/tracetools_analysis.git

@@ -17,6 +17,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(tracetools REQUIRED)
 
 set(dependencies
   canopen_base_driver
@@ -28,6 +29,7 @@ set(dependencies
   rclcpp_components
   sensor_msgs
   std_srvs
+  tracetools
 )
 
 add_library(lely_motion_controller_bridge
@@ -150,5 +152,6 @@ ament_export_targets(
 ament_export_dependencies(
   ${dependencies}
 )
+ament_export_dependencies(tracetools)
 
 ament_package()
