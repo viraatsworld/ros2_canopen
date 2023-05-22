@@ -17,6 +17,30 @@ find_package(rclcpp_components REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(PC_MUPARSER QUIET muparser)
+set(MUPARSER_DEFINITIONS ${PC_MUPARSER_CFLAGS_OTHER})
+find_path(MUPARSER_INCLUDE_DIR muParser.h
+          HINTS ${PC_MUPARSER_INCLUDEDIR} ${PC_MUPARSER_INCLUDE_DIRS}
+)
+
+find_library(MUPARSER_LIBRARY NAMES muparser libmurser
+             HINTS ${PC_MUPARSER_LIBDIR} ${PC_MUPARSER_LIBRARY_DIRS} )
+
+include(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set MUPARSER_FOUND to TRUE
+# if all listed variables are TRUE
+find_package_handle_standard_args(MUPARSER  DEFAULT_MSG
+                                  MUPARSER_LIBRARY MUPARSER_INCLUDE_DIR)
+mark_as_advanced(MUPARSER_INCLUDE_DIR MUPARSER_LIBRARY )
+
+if(NOT ${MUPARSER_FOUND})
+  message(FATAL_ERROR "muparser library not found")
+endif()
+
+set(MUPARSER_LIBRARIES ${MUPARSER_LIBRARY} )
+set(MUPARSER_INCLUDE_DIRS ${MUPARSER_INCLUDE_DIR} )
 
 set(dependencies
   canopen_base_driver
@@ -55,14 +79,15 @@ target_compile_features(node_canopen_cia402_driver PUBLIC c_std_99 cxx_std_17)  
 target_compile_options(node_canopen_cia402_driver PUBLIC -Wl,--no-undefined)
 target_include_directories(node_canopen_cia402_driver PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+  ${MUPARSER_INCLUDE_DIRS})
 target_link_libraries(node_canopen_cia402_driver
   lely_motion_controller_bridge
+  ${MUPARSER_LIBRARIES}
 )
 ament_target_dependencies(
   node_canopen_cia402_driver
   ${dependencies}
-
 )
 
 add_library(lifecycle_cia402_driver

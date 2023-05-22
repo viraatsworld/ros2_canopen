@@ -7,6 +7,7 @@
 #include "canopen_proxy_driver/node_interfaces/node_canopen_proxy_driver.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 
+#include "canopen_402_driver/scale_convertor.hpp"
 namespace ros2_canopen
 {
 namespace node_interfaces
@@ -38,6 +39,8 @@ protected:
   double scale_pos_from_dev_;
   double scale_vel_to_dev_;
   double scale_vel_from_dev_;
+  std::shared_ptr<ScaleConverter> scale_converter_;
+
   ros2_canopen::State402::InternalState switching_state_;
 
   void publish();

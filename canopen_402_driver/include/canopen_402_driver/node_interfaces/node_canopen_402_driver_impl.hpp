@@ -143,28 +143,36 @@ void NodeCanopen402Driver<rclcpp_lifecycle::LifecycleNode>::configure(bool calle
   std::optional<int> switching_state;
   try
   {
-    scale_pos_to_dev = std::optional(this->config_["scale_pos_to_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_pos_to_dev"].as<std::string>());
+    scale_pos_to_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
   }
   try
   {
-    scale_pos_from_dev = std::optional(this->config_["scale_pos_from_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_pos_from_dev"].as<std::string>());
+    scale_pos_from_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
   }
   try
   {
-    scale_vel_to_dev = std::optional(this->config_["scale_vel_to_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_vel_to_dev"].as<std::string>());
+    scale_vel_to_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
   }
   try
   {
-    scale_vel_from_dev = std::optional(this->config_["scale_vel_from_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_vel_from_dev"].as<std::string>());
+    scale_vel_from_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
@@ -202,28 +210,36 @@ void NodeCanopen402Driver<rclcpp::Node>::configure(bool called_from_base)
   std::optional<int> switching_state;
   try
   {
-    scale_pos_to_dev = std::optional(this->config_["scale_pos_to_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_pos_to_dev"].as<std::string>());
+    scale_pos_to_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
   }
   try
   {
-    scale_pos_from_dev = std::optional(this->config_["scale_pos_from_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_pos_from_dev"].as<std::string>());
+    scale_pos_from_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
   }
   try
   {
-    scale_vel_to_dev = std::optional(this->config_["scale_vel_to_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_vel_to_dev"].as<std::string>());
+    scale_vel_to_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
   }
   try
   {
-    scale_vel_from_dev = std::optional(this->config_["scale_vel_from_dev"].as<double>());
+    scale_converter_ =
+      std::make_shared<ScaleConverter>(this->config_["scale_vel_from_dev"].as<std::string>());
+    scale_vel_from_dev = std::optional(scale_converter_->eval());
   }
   catch (...)
   {
