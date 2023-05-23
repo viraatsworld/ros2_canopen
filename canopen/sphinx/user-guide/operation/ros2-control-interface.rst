@@ -8,8 +8,7 @@ This package provides multiple hardware interfaces for testing. Mainly the follo
 
 - canopen_ros2_control/CanopenSystem: A system interface for ProxyDrivers
 - canopen_ros2_control/Cia402System: A system interface for Cia402Drivers
-- canopen_ros2_control/Cia402RobotSystem: A system interface for Cia402Drivers in a robot configuration (under development)
-
+- canopen_ros2_control/RobotSystem: A system interface for Cia402Drivers in a robot configuration (under development)
 
 Robot System Interface
 ''''''''''''''''''''''
@@ -21,27 +20,50 @@ CANopen nodes that have a Cia402Driver attached to them.
 
 The ros2_control interface only works with non-lifecycle drivers right now.
 For each joint in your urdf you can choose the attached CANopen device by using the
-``node_id`` parameter. The ``node_id`` parameter is the CANopen node id of the device.
+``device_name`` parameter. The ``device_name`` parameter is the CANopen device and it described in ``bus.yml`` file.
 
 .. code-block:: xml
 
     <ros2_control name="${name}" type="system">
         <hardware>
-            <plugin>canopen_ros2_control/Cia402RobotSystem</plugin>
+            <plugin>canopen_ros2_control/RobotSystem</plugin>
             <param name="bus_config">[path to bus.yml]</param>
             <param name="master_config">[path to master.dcf]</param>
             <param name="can_interface_name">[can interface to be used]</param>
             <param name="master_bin">[master.bin if it exists]</param>
         </hardware>
         <joint name="joint1">
-            <param name="node_id">3</param>
+            <param name="device_name">joint_1</param>
             ...
         </joint>
         <joint name="joint2">
-            <param name="node_id">3</param>
+            <param name="device_name">joint_2</param>
             ...
         </joint>
     </ros2_control>
+
+The robot system interface adds few more configuration parameters to the ``bus.yml`` file.
+
+.. code-block:: yaml
+
+    [...]
+
+    defaults:
+        [...]
+        position_mode: [value]
+        [or]
+        velocity_mode: [value]
+        [or]
+        effort_mode: [value]
+        [...]
+
+    nodes:
+        joint_1:
+            node_id : [value]
+        joint_2:
+            node_id : [value]
+
+For more information about value to be used for the different modes, please refer to the `API documentation <https://ros-industrial.github.io/ros2_canopen/api/classros2__canopen_1_1MotorBase.html>`_.
 
 .. note::
 

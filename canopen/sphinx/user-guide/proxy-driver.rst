@@ -13,6 +13,9 @@ Services
   * - Services
     - Type
     - Description
+  * - ~/nmt_start_node
+    - Trigger
+    - Starts CANopen Device the Proxy Device Node manages.
   * - ~/nmt_reset_node
     - Trigger
     - Resets CANopen Device the Proxy Device Node manages.
