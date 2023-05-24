@@ -84,6 +84,8 @@ but come from the lely core library. Below you find a list of possible configura
   stop_all_nodes;	Specifies whether all slaves shall be stopped in case of an error event on a mandatory slave (default: false, see bit 6 in object 1F80).
   boot_time;	The timeout for booting mandatory slaves in ms (default: 0, see object 1F89).
 
+.. _defaults_section:
+
 Defaults Section
 ----------------
 The device configuration enables configuring the characteristics of the connected CANopen
@@ -138,6 +140,28 @@ The nodes section contains a list of devices on the bus. Each device has a name 
 
 
 //TODO: Reference to old format which is still supported!
+
+.. note::
+
+  Selecting poll timer:
+
+  - When following is added to a node in bus.yaml, the driver will use the ros2 timer to poll the drive status. Polling using ros2 timer is default. However, it is not recommended because it is not real-time.
+    .. code-block:: yaml
+
+      polling: true
+      period: 10 # in milliseconds
+
+      [or]
+
+      polling: true # default period is 10ms
+
+  - When following is added to a node in bus.yaml, the driver will use the CANopen ``SYNC`` message to poll the drive status.
+
+    .. code-block:: yaml
+
+      polling: false
+
+  For more information on bus configuration parameters refer to :ref:`defaults section<defaults_section>`.
 
 Further references
 ------------------

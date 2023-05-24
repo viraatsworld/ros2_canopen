@@ -35,6 +35,9 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinxcontrib.plantuml",
     "breathe",
+    "sphinx_tabs.tabs",
+    "sphinx_multiversion",
+    "sphinx.ext.autosectionlabel",
 ]
 
 breathe_default_project = "ros2_canopen"
