@@ -66,6 +66,7 @@ public:
     const std::string & dcf_txt, const std::string & dcf_bin = "", uint8_t id = (uint8_t)255U)
   : lely::canopen::AsyncMaster(exec, timer, chan, dcf_txt, dcf_bin, id), node_id(id)
   {
+    this->SetTimeout(500ms);
   }
 
   /**
