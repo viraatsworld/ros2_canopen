@@ -239,10 +239,13 @@ public:
     {
       throw DriverException("Activate: driver is already activated");
     }
+    RCLCPP_INFO(node_->get_logger(), "Activating driver");
     this->add_to_master();
+    RCLCPP_INFO(node_->get_logger(), "Added to master");
     this->activate(true);
+    RCLCPP_INFO(node_->get_logger(), "Activated Driver specifc stuff");
     this->activated_.store(true);
-    RCLCPP_DEBUG(node_->get_logger(), "activate_end");
+    RCLCPP_INFO(node_->get_logger(), "activate_end");
   }
 
   /**

@@ -834,6 +834,9 @@ public:
     {
       std::scoped_lock<std::mutex> lck(this->dictionary_mutex_);
       this->dictionary_->setVal<T>(index, subindex, value);
+      // RCLCPP_INFO(
+      //   rclcpp::get_logger(name_), "RPDO Mapped: index=0x%x subindex=0x%x value=0x%x", index,
+      //   subindex, value);
       this->tpdo_mapped[index][subindex] = value;
       this->tpdo_mapped[index][subindex].WriteEvent();
     }

@@ -216,7 +216,7 @@ void NodeCanopenBaseDriver<NODETYPE>::add_to_master()
       prom->set_value(lely_driver_);
     });
 
-  auto future_status = f.wait_for(this->non_transmit_timeout_);
+  auto future_status = f.wait_for(std::chrono::seconds(10));
   if (future_status != std::future_status::ready)
   {
     RCLCPP_ERROR(this->node_->get_logger(), "Adding timed out.");
