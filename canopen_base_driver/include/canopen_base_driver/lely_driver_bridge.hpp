@@ -766,20 +766,30 @@ public:
       20ms);
   }
 
-  template <typename T>
-  const T universal_get_value(uint16_t index, uint8_t subindex)
+  /**
+   * @brief Check if object is mapped in PDO
+   * @param index
+   * @param subindex
+  */
+  bool is_pdo_mapped(uint16_t index, uint8_t subindex)
   {
-    T value = 0;
-    bool is_tpdo = false;
     if (this->pdo_map_->find(index) != this->pdo_map_->end())
     {
       auto object = this->pdo_map_->at(index);
       if (object.find(subindex) != object.end())
       {
         auto entry = object.at(subindex);
-        is_tpdo = entry.is_tpdo;
+        return entry.is_rpdo || entry.is_tpdo;
       }
     }
+    return false;
+  }
+
+  template <typename T>
+  const T universal_get_value(uint16_t index, uint8_t subindex)
+  {
+    T value = 0;
+    bool is_tpdo = is_pdo_mapped(index, subindex);
     if (!is_tpdo)
     {
       if (sync_sdo_read_typed<T>(index, subindex, value, std::chrono::milliseconds(20)))
@@ -820,16 +830,7 @@ public:
   template <typename T>
   void universal_set_value(uint16_t index, uint8_t subindex, T value)
   {
-    bool is_rpdo = false;
-    if (this->pdo_map_->find(index) != this->pdo_map_->end())
-    {
-      auto object = this->pdo_map_->at(index);
-      if (object.find(subindex) != object.end())
-      {
-        auto entry = object.at(subindex);
-        is_rpdo = entry.is_rpdo;
-      }
-    }
+    bool is_rpdo = is_pdo_mapped(index, subindex);
     if (is_rpdo)
     {
       std::scoped_lock<std::mutex> lck(this->dictionary_mutex_);
