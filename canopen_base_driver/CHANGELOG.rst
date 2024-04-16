@@ -2,6 +2,14 @@
 Changelog for package canopen_base_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add timeouts
+* change error to warn for testing
+* remove build warings
+* non transmit time from bus.yml
+* Contributors: Vishnuprasad Prachandabhanu
+
 0.2.8 (2024-01-19)
 ------------------
 

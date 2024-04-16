@@ -2,6 +2,11 @@
 Changelog for package canopen_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* timeout for booting slave
+* Contributors: Vishnuprasad Prachandabhanu, ipa-vsp
+
 0.2.8 (2024-01-19)
 ------------------
 

@@ -2,6 +2,14 @@
 Changelog for package canopen
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update maintainer list
+* Add timeouts
+* change from 100ms to 2000ms
+* timeout for booting slave
+* Contributors: Vishnuprasad Prachandabhanu, ipa-vsp
+
 0.2.8 (2024-01-19)
 ------------------
 * Documentation: Fix launch file spelling (`#208 <https://github.com/ros-industrial/ros2_canopen/issues/208>`_)
