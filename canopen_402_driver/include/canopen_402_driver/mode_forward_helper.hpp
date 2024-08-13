@@ -42,7 +42,7 @@ public:
     if (this->hasTarget())
     {
       cw = cw.get() | CW_MASK;
-
+      std::cout << "Setting value " << this->getTarget() << std::endl;
       driver->universal_set_value<TYPE>(OBJ, SUB, this->getTarget());
       return true;
     }

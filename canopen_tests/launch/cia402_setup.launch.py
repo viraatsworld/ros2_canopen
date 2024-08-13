@@ -41,7 +41,7 @@ def generate_launch_description():
     master_bin_path = os.path.join(
         get_package_share_directory("canopen_tests"),
         "config",
-        "cia402_lifecycle",
+        "cia402",
         "master.bin",
     )
     if not os.path.exists(master_bin_path):

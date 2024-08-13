@@ -418,6 +418,7 @@ void NodeCanopen402Driver<NODETYPE>::handle_set_target(
   const canopen_interfaces::srv::COTargetDouble::Request::SharedPtr request,
   canopen_interfaces::srv::COTargetDouble::Response::SharedPtr response)
 {
+  RCLCPP_INFO(this->node_->get_logger(), "Target and device activated state: %d", (int)this->activated_.load());
   if (this->activated_.load())
   {
     auto mode = motor_->getMode();
@@ -438,7 +439,7 @@ void NodeCanopen402Driver<NODETYPE>::handle_set_target(
     {
       target = request->target;
     }
-
+    RCL
     response->success = motor_->setTarget(target);
   }
 }
@@ -617,6 +618,7 @@ bool NodeCanopen402Driver<NODETYPE>::set_mode_torque()
 template <class NODETYPE>
 bool NodeCanopen402Driver<NODETYPE>::set_target(double target)
 {
+  RCLCPP_INFO(this->node_->get_logger(), "Target %f and device activated state: %d", target, (int)this->activated_.load());
   if (this->activated_.load())
   {
     auto mode = motor_->getMode();
@@ -637,7 +639,7 @@ bool NodeCanopen402Driver<NODETYPE>::set_target(double target)
     {
       scaled_target = target;
     }
-    // RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", scaled_target);
+    RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", scaled_target);
     return motor_->setTarget(scaled_target);
   }
   else

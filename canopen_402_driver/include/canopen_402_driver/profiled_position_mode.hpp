@@ -77,6 +77,7 @@ public:
         }
         else
         {
+          std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Setting new target: " << target << std::endl;
           driver->universal_set_value(index, 0x0, target);
           cw.set(CW_NewPoint);
           last_target_ = target;
