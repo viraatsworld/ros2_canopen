@@ -20,7 +20,7 @@ This is the documentation of the ROS2 CANopen stack.
   user_guide/1_operation
   user_guide/2_interface
   user_guide/3_configuration
-
+  user_guide/how_to_make_pkg
 .. toctree::
   :maxdepth: 1
   :caption: Examples
