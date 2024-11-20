@@ -1,6 +1,8 @@
+Operation
+=========
 .. toctree:: 
     :maxdepth: 1
-    :caption: Operation
     :glob:
 
-    1_1operation/**
+    1_1operation/op_interface
+    1_1operation/op_mode
