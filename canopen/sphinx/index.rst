@@ -8,19 +8,17 @@ This is the documentation of the ROS2 CANopen stack.
   :caption: Quickstart
   :glob:
 
-  quickstart/installation
-  quickstart/setup-network
-  quickstart/examples
+  1_quickstart/1_installation
+  1_quickstart/2_network_setup
+  1_quickstart/3_examples
 
 .. toctree::
   :maxdepth: 1
   :caption: User Guide
   :glob:
+  
+  user_guide/**
 
-  user-guide/1_operation
-  user-guide/2_interface
-  user-guide/3_configuration
-  user-guide/4_how_to_guide
 
 .. toctree::
   :maxdepth: 1

@@ -1,4 +1,4 @@
-Cia402 Driver
+Cia402 Interface
 ========================
 
 The Cia402 Driver implements the CIA402 profile for motion controllers and enables setting

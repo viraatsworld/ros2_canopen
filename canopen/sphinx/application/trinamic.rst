@@ -9,7 +9,7 @@ This tutorial is a simple example of how to use the ros2_canopen package to cont
 Getting started
 ---------------
 
-If you haven't already done so, follow the steps in the :doc:`../user-guide/configuration`.
+If you haven't already done so, follow the steps in the :doc:`../user_guide/configuration`.
 
 To know more about how to create a configuration follow this steps: :doc:`../user-guide/how-to-create-a-configuration`.
 

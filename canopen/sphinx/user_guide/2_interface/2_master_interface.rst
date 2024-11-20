@@ -1,5 +1,5 @@
-Master Driver
-=============
+Master Interface
+=================
 
 The master driver handles the creation of the necessary can interface and sets up a canopen event loop which drivers can hook onto.
 In addition, the node offers services for communicating with nodes via nmt and sdo.
