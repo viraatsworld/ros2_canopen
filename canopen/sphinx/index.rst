@@ -17,8 +17,9 @@ This is the documentation of the ROS2 CANopen stack.
   :caption: User Guide
   :glob:
   
-  user_guide/**
-
+  user_guide/1_operation
+  user_guide/2_interface
+  user_guide/3_configuration
 
 .. toctree::
   :maxdepth: 1
