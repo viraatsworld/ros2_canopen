@@ -64,6 +64,36 @@ public:
     // lely::CODev::~CODev();
   }
 
+  void update_pdo_mapping(PDOMap &pdo_map, uint16_t pdo_index, uint8_t sub_index, uint32_t mapping_value, bool is_tpdo)
+  {
+    auto obj = find(pdo_index, sub_index);
+    if (obj == nullptr)
+    {
+      std::cout << "Object not found in dictionary" << std::endl;
+      return;
+    }
+    if (sub_index == 0)
+    {
+      obj->setVal<uint8_t>(static_cast<uint8_t>(mapping_value));
+      return;
+    }
+
+    obj->setVal<uint32_t>(mapping_value);
+
+    uint16_t mapped_index = (mapping_value >> 16) & 0xFFFF;
+    uint8_t mapped_subindex = (mapping_value >> 8) & 0xFF;
+
+    pdo_mapping mapping;
+    mapping.is_tpdo = is_tpdo;
+    mapping.is_rpdo = !is_tpdo;
+
+    pdo_map[mapped_index][mapped_subindex] = mapping;
+
+    auto count_obj = find(pdo_index, 0x00);
+    uint8_t current_count = count_obj->getVal<CO_DEFTYPE_UNSIGNED8>();
+    count_obj->setVal<uint8_t>(current_count + 1);
+  }
+
   std::shared_ptr<PDOMap> createPDOMapping()
   {
     std::shared_ptr<PDOMap> pdo_map = std::make_shared<PDOMap>();
