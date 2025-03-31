@@ -439,7 +439,6 @@ void NodeCanopen402Driver<NODETYPE>::handle_set_target(
     {
       target = request->target;
     }
-    RCL
     response->success = motor_->setTarget(target);
   }
 }

@@ -74,11 +74,11 @@ public:
     }
     if (sub_index == 0)
     {
-      obj->setVal<uint8_t>(static_cast<uint8_t>(mapping_value));
+      // obj->setVal<uint8_t>(static_cast<uint8_t>(mapping_value));
       return;
     }
 
-    obj->setVal<uint32_t>(mapping_value);
+    // this->insert(obj);
 
     uint16_t mapped_index = (mapping_value >> 16) & 0xFFFF;
     uint8_t mapped_subindex = (mapping_value >> 8) & 0xFF;
@@ -89,9 +89,17 @@ public:
 
     pdo_map[mapped_index][mapped_subindex] = mapping;
 
+    COObj* new_count_obj = new COObj(mapped_index);
+    COSub* new_count_sub = new COSub(mapped_subindex, CO_DEFTYPE_UNSIGNED32);
+    new_count_obj->insert(new_count_sub);
+    insert(new_count_obj);
+
     auto count_obj = find(pdo_index, 0x00);
     uint8_t current_count = count_obj->getVal<CO_DEFTYPE_UNSIGNED8>();
-    count_obj->setVal<uint8_t>(current_count + 1);
+    std::cout << "Mapped object: index=" << std::hex << (int)mapped_index
+              << " subindex=" << (int)mapped_subindex << " is_tpdo=" << is_tpdo << " is_rpdo=" << !is_tpdo
+              << " count=" << (int)current_count << std::endl;
+    // count_obj->setVal<uint8_t>(current_count + 1);
   }
 
   std::shared_ptr<PDOMap> createPDOMapping()
@@ -319,6 +327,7 @@ protected:
 
   // NMT synchronisation items
   std::promise<canopen::NmtState> nmt_state_promise;
+  canopen::NmtState nmt_state;
   std::atomic<bool> nmt_state_is_set;
   std::mutex nmt_mtex;
 
@@ -428,7 +437,6 @@ public:
    * @param [in] id       NodeId to connect to
    * @param [in] eds      EDS file
    * @param [in] bin      BIN file (concise dcf)
-   * @param [in] timeout  Timeout in milliseconds for SDO reads/writes
    *
    */
   LelyDriverBridge(
@@ -451,6 +459,25 @@ public:
     }
     pdo_map_ = dictionary_->createPDOMapping();
     sdo_timeout = timeout;
+  }
+
+  void update_pdo_mapping(uint16_t pdo_index, uint8_t sub_index, uint32_t mapping_value, bool is_tpdo)
+  {
+    ros2_canopen::COData data = {pdo_index, sub_index, mapping_value};
+    auto f = this->async_sdo_write(data);
+    f.wait();
+    try
+    {
+      auto res = f.get();
+      std::cout << "Updating!! PDO Mapping: pdo_index=" << pdo_index << " sub_index=" << (int)sub_index
+                << " mapping_value=" << mapping_value << " is_tpdo=" << is_tpdo << std::endl;
+    }
+    catch (std::exception & e)
+    {
+      RCLCPP_ERROR(rclcpp::get_logger(name_), e.what());
+    }
+    std::scoped_lock<std::mutex> lck(dictionary_mutex_);
+    dictionary_->update_pdo_mapping(*pdo_map_, pdo_index, sub_index, mapping_value, is_tpdo);
   }
 
   /**
@@ -715,6 +742,7 @@ public:
     else
     {
       booted.store(true);
+      std::cout << "NMT at boot ID= "<< (unsigned int)this->get_id() << " state: " << (int)nmt_state << std::endl;
       return true;
     }
     return false;
@@ -797,12 +825,14 @@ public:
         this->running = false;
         this->sdo_cond.notify_one();
       },
-      this->sdo_timeout);
+      20ms);
   }
 
   template <typename T>
   const T universal_get_value(uint16_t index, uint8_t subindex)
   {
+    std::cout << "universal_get_value: id=" << (unsigned int)this->get_id() << " index=0x"
+              << std::hex << (unsigned int)index << " subindex=" << (unsigned int)subindex << std::endl;
     T value = 0;
     bool is_tpdo = false;
     if (this->pdo_map_->find(index) != this->pdo_map_->end())
@@ -823,6 +853,9 @@ public:
     }
 
     std::scoped_lock<std::mutex> lck(this->dictionary_mutex_);
+    std::cout << "universal_get_value: id=" << (unsigned int)this->get_id() << " index=0x"
+              << std::hex << (unsigned int)index << " subindex=" << (unsigned int)subindex
+              << " object found in map " << std::endl;
     if (typeid(T) == typeid(uint8_t))
     {
       value = this->dictionary_->getVal<CO_DEFTYPE_UNSIGNED8>(index, subindex);
@@ -868,6 +901,9 @@ public:
     {
       std::scoped_lock<std::mutex> lck(this->dictionary_mutex_);
       this->dictionary_->setVal<T>(index, subindex, value);
+      // RCLCPP_INFO(
+      //   rclcpp::get_logger(name_), "RPDO Mapped: index=0x%x subindex=0x%x value=0x%x", index,
+      //   subindex, value);
       this->tpdo_mapped[index][subindex] = value;
       this->tpdo_mapped[index][subindex].WriteEvent();
     }
