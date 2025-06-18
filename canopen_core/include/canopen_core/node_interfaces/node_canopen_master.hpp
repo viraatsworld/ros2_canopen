@@ -87,6 +87,9 @@ protected:
   std::string can_interface_name_;
   uint32_t timeout_;
 
+  bool start_nodes_{true};
+  bool start_all_nodes_{false};
+
   std::thread spinner_;
 
 public:
@@ -121,6 +124,8 @@ public:
     node_->declare_parameter("node_id", 0);
     node_->declare_parameter("non_transmit_timeout", 100);
     node_->declare_parameter("config", "");
+    node_->declare_parameter("start_nodes", true);
+    node_->declare_parameter("start_all_nodes", false);
     this->init(true);
     this->initialised_.store(true);
     RCLCPP_DEBUG(node_->get_logger(), "init_end");
@@ -159,6 +164,8 @@ public:
     node_->get_parameter("node_id", node_id_);
     node_->get_parameter("non_transmit_timeout", non_transmit_timeout);
     node_->get_parameter("config", config);
+    node_->get_parameter("start_nodes", start_nodes_);
+    node_->get_parameter("start_all_nodes", start_all_nodes_);
 
     this->config_ = YAML::Load(config);
     this->non_transmit_timeout_ = std::chrono::milliseconds(non_transmit_timeout);
@@ -226,6 +233,11 @@ public:
     }
     this->master_set_.store(true);
     this->master_->Reset();
+    if (start_all_nodes_)
+    {
+      this->master_->Command(lely::canopen::NmtCommand::RESET_NODE, 0);
+      this->master_->Command(lely::canopen::NmtCommand::START, 0);
+    }
     this->spinner_ = std::thread(
       [this]()
       {

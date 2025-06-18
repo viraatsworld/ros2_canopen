@@ -244,6 +244,10 @@ bool DeviceContainer::load_master()
       params.push_back(rclcpp::Parameter("node_id", (int)node_id.value()));
       params.push_back(rclcpp::Parameter("non_transmit_timeout", 100));
       params.push_back(rclcpp::Parameter("config", config_->dump_device(*it)));
+      start_nodes_ = config_->get_start_nodes();
+      start_all_nodes_ = config_->get_start_all_nodes();
+      params.push_back(rclcpp::Parameter("start_nodes", start_nodes_));
+      params.push_back(rclcpp::Parameter("start_all_nodes", start_all_nodes_));
 
       if (!this->load_component(
             package_name.value(), driver_name.value(), node_id.value(), *it, params,
@@ -320,6 +324,10 @@ bool DeviceContainer::load_drivers()
       params.push_back(rclcpp::Parameter("node_id", (int)node_id.value()));
       params.push_back(rclcpp::Parameter("config", config_->dump_device(*it)));
       params.push_back(rclcpp::Parameter("non_transmit_timeout", 100));
+      bool reset_comm = config_->get_reset_communication(*it);
+      reset_communication_[node_id.value()] = reset_comm;
+      params.push_back(rclcpp::Parameter("reset_communication", reset_comm));
+      params.push_back(rclcpp::Parameter("start_node", start_nodes_));
 
       if (!this->load_component(
             package_name.value(), driver_name.value(), node_id.value(), *it, params,

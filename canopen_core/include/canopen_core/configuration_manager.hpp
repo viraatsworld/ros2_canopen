@@ -41,6 +41,9 @@ private:
   std::string file_;                           ///< Stores the configuration file name
   YAML::Node root_;                            ///< Stores YAML root node
   std::map<std::string, YAML::Node> devices_;  ///< Stores all configuration per device
+  bool start_nodes_{true};                     ///< Master start nodes flag
+  bool start_all_nodes_{false};                ///< Master start all nodes flag
+  std::map<std::string, bool> reset_communication_;  ///< Reset communication flag per device
 
 public:
   ConfigurationManager(std::string & file) : file_(file) { root_ = YAML::LoadFile(file_.c_str()); }
@@ -105,6 +108,20 @@ public:
    * @return uint32_t         Number of devices discovered
    */
   uint32_t get_all_devices(std::vector<std::string> & devices);
+
+  bool get_start_nodes() const { return start_nodes_; }
+
+  bool get_start_all_nodes() const { return start_all_nodes_; }
+
+  bool get_reset_communication(const std::string & device) const
+  {
+    auto it = reset_communication_.find(device);
+    if (it != reset_communication_.end())
+    {
+      return it->second;
+    }
+    return true;
+  }
 };
 }  // namespace ros2_canopen
 

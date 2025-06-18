@@ -76,6 +76,8 @@ protected:
   std::string container_name_;
   std::string eds_;
   std::string bin_;
+  bool start_node_{true};
+  bool reset_communication_{true};
 
   rclcpp::CallbackGroup::SharedPtr client_cbg_;
   rclcpp::CallbackGroup::SharedPtr timer_cbg_;
@@ -142,6 +144,8 @@ public:
     node_->declare_parameter("node_id", 0);
     node_->declare_parameter("non_transmit_timeout", 100);
     node_->declare_parameter("config", "");
+    node_->declare_parameter("start_node", true);
+    node_->declare_parameter("reset_communication", true);
     this->init(true);
     this->initialised_.store(true);
     RCLCPP_DEBUG(node_->get_logger(), "init_end");
@@ -193,6 +197,8 @@ public:
     node_->get_parameter("non_transmit_timeout", non_transmit_timeout);
     node_->get_parameter("node_id", this->node_id_);
     node_->get_parameter("config", config);
+    node_->get_parameter("start_node", start_node_);
+    node_->get_parameter("reset_communication", reset_communication_);
     this->config_ = YAML::Load(config);
     this->non_transmit_timeout_ = std::chrono::milliseconds(non_transmit_timeout);
     auto path = this->config_["dcf_path"].as<std::string>();

@@ -610,6 +610,15 @@ TEST_F(DeviceContainerTest, test_load_master_good)
         std::string & package_name, std::string & driver_name, uint16_t node_id,
         std::string & node_name, std::vector<rclcpp::Parameter> & params) -> bool
       {
+        bool have_start_nodes = false;
+        bool have_start_all = false;
+        for (auto & p : params)
+        {
+          if (p.get_name() == "start_nodes") have_start_nodes = p.as_bool();
+          if (p.get_name() == "start_all_nodes") have_start_all = p.as_bool();
+        }
+        EXPECT_TRUE(have_start_nodes);
+        EXPECT_FALSE(have_start_all);
         device_container->can_master_ =
           std::static_pointer_cast<ros2_canopen::CanopenMasterInterface>(can_master);
         return true;
@@ -679,6 +688,15 @@ TEST_F(DeviceContainerTest, test_load_driver_good)
         std::string & package_name, std::string & driver_name, uint16_t node_id,
         std::string & node_name, std::vector<rclcpp::Parameter> & params) -> bool
       {
+        bool reset_param = false;
+        bool start_param = false;
+        for (auto & p : params)
+        {
+          if (p.get_name() == "reset_communication") reset_param = p.as_bool();
+          if (p.get_name() == "start_node") start_param = p.as_bool();
+        }
+        EXPECT_TRUE(reset_param);
+        EXPECT_TRUE(start_param);
         device_container->registered_drivers_[2] =
           std::static_pointer_cast<ros2_canopen::CanopenDriverInterface>(driver);
         return true;

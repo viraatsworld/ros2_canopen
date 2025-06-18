@@ -201,6 +201,18 @@ public:
    */
   virtual size_t count_drivers() { return registered_drivers_.size(); }
 
+  bool get_start_nodes() const { return start_nodes_; }
+  bool get_start_all_nodes() const { return start_all_nodes_; }
+  bool get_reset_communication(uint16_t id) const
+  {
+    auto it = reset_communication_.find(id);
+    if (it != reset_communication_.end())
+    {
+      return it->second;
+    }
+    return true;
+  }
+
   /**
    * @brief Get node ids of all drivers with type
    *
@@ -281,6 +293,9 @@ protected:
   std::string dcf_bin_;             ///< Cached value of .bin file parameter
   std::string can_interface_name_;  ///< Cached value of can interface name
   bool lifecycle_operation_;
+  bool start_nodes_{true};               ///< Start nodes flag from bus config
+  bool start_all_nodes_{false};          ///< Start all nodes flag from bus config
+  std::map<uint16_t, bool> reset_communication_;  ///< Reset communication per node id
 
   // ROS Objects
   std::weak_ptr<rclcpp::Executor> executor_;  ///< Pointer to ros executor instance

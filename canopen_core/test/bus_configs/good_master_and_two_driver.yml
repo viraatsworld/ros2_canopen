@@ -3,6 +3,8 @@ master:
   node_id: 1
   driver: "ros2_canopen::CanopenMaster"
   package: "canopen_core"
+  start_nodes: true
+  start_all_nodes: false
 
 proxy_device_1:
   node_id: 2
@@ -10,6 +12,7 @@ proxy_device_1:
   dcf_path: "install/canopen_tests/share/canopen_tests/config/simple"
   driver: "ros2_canopen::CanopenDriver"
   package: "canopen_core"
+  reset_communication: true
 
 proxy_device_2:
   node_id: 3
@@ -17,3 +20,4 @@ proxy_device_2:
   dcf_path: "install/canopen_tests/share/canopen_tests/config/simple"
   driver: "ros2_canopen::CanopenDriver"
   package: "canopen_core"
+  reset_communication: true

@@ -41,6 +41,26 @@ void ConfigurationManager::init_config()
     {
       config_node["dcf_path"] = dcf_path;
     }
+    if (driver_name == "master")
+    {
+      if (config_node["start_nodes"])
+      {
+        start_nodes_ = config_node["start_nodes"].as<bool>();
+      }
+      if (config_node["start_all_nodes"])
+      {
+        start_all_nodes_ = config_node["start_all_nodes"].as<bool>();
+      }
+    }
+    else
+    {
+      bool reset_comm = true;
+      if (config_node["reset_communication"])
+      {
+        reset_comm = config_node["reset_communication"].as<bool>();
+      }
+      reset_communication_[driver_name] = reset_comm;
+    }
     devices_.insert({driver_name, config_node});
   }
 }

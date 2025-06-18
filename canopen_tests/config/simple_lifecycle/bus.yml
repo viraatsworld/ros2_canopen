@@ -5,12 +5,15 @@ master:
   node_id: 1
   driver: "ros2_canopen::LifecycleMasterDriver"
   package: "canopen_master_driver"
+  start_nodes: true
+  start_all_nodes: false
 
 proxy_device_1:
   node_id: 2
   dcf: "simple.eds"
   driver: "ros2_canopen::LifecycleProxyDriver"
   package: "canopen_proxy_driver"
+  reset_communication: true
 
 proxy_device_2:
   node_id: 3

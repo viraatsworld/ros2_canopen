@@ -5,6 +5,8 @@ master:
   node_id: 1
   driver: "ros2_canopen::MasterDriver"
   package: "canopen_master_driver"
+  start_nodes: true
+  start_all_nodes: false
 
 proxy_device_1:
   node_id: 2
@@ -13,6 +15,7 @@ proxy_device_1:
   package: "canopen_proxy_driver"
   polling: true
   period: 10
+  reset_communication: true
   namespace: "/test1"
 
 proxy_device_2:
@@ -23,3 +26,4 @@ proxy_device_2:
   polling: true
   period: 10
   namespace: "/test2"
+  reset_communication: true

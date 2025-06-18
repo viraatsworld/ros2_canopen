@@ -107,8 +107,8 @@ but come from the lely core library. Below you find a list of possible configura
   error_behavior;	A dictionary of error behaviors for different classes or errors (default: {1: 0x00}, see object 1029).
   nmt_inhibit_time;	The NMT inhibit time in multiples of 100 μs (default: 0, see object 102A).
   start;	Specifies whether the master shall switch into the NMT operational state by itself (default: true, see bit 2 in object 1F80).
-  start_nodes;	Specifies whether the master shall start the slaves (default: true, see bit 3 in object 1F80).
-  start_all_nodes;	Specifies whether the master shall start all nodes simultaneously (default: false, see bit 1 in object 1F80).
+  start_nodes;  Specifies whether the master shall start the slaves. When enabled each device receives an NMT reset (``RESET_COMM`` or ``RESET_NODE`` depending on ``reset_communication``) followed by ``START`` (default: true, see bit 3 in object 1F80).
+  start_all_nodes;      Specifies whether the master shall start all nodes simultaneously by sending a broadcast ``RESET_NODE`` and ``START`` (default: false, see bit 1 in object 1F80).
   reset_all_nodes;	Specifies whether all slaves shall be reset in case of an error event on a mandatory slave (default: false, see bit 4 in object 1F80).
   stop_all_nodes;	Specifies whether all slaves shall be stopped in case of an error event on a mandatory slave (default: false, see bit 6 in object 1F80).
   boot_time;	The timeout for booting mandatory slaves in ms (default: 0, see object 1F89).
@@ -149,7 +149,7 @@ device.
   tpdo;	The Transmit-PDO configuration (see below).
   boot;	Specifies whether the slave will be configured and booted by the master (default: true, see bit 2 in object 1F81).
   mandatory;	Specifies whether the slave is mandatory (default: false, see bit 3 in object 1F81).
-  reset_communication;	Specifies whether the NMT reset communication command may be sent to the slave (default: true, see bit 4 in object 1F81).
+  reset_communication;  Specifies whether the NMT reset communication command may be sent to the slave. If false the slave is reset with ``RESET_NODE`` instead (default: true, see bit 4 in object 1F81).
   software_file;	The name of the file containing the firmware (default: "", see object 1F58).
   software_version;	The expected software version (default: 0x00000000, see object 1F55).
   configuration_file;	The name of the file containing the configuration (default: "<dcf_path>/<name>.bin" (where <name> is the section name), see object 1F22).
