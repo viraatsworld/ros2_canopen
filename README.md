@@ -28,16 +28,20 @@ The stack is currently under development and not yet ready for production use.
 
 ## Documentation
 The documentation consists of two parts: a manual and an api reference.
-The documentation is built for rolling (master), iron and humble and hosted on github pages.
+The documentation is built for rolling (master), jazzy, kilted and humble and hosted on github pages.
 Older ROS 2 releases are EOL and are not supported anymore.
 
 ### Rolling
 * Manual: https://ros-industrial.github.io/ros2_canopen/manual/rolling/
 * API reference: https://ros-industrial.github.io/ros2_canopen/api/rolling/
 
-### Iron
-* Manual: https://ros-industrial.github.io/ros2_canopen/manual/iron/
-* API reference: https://ros-industrial.github.io/ros2_canopen/api/iron/
+### Jazzy
+* Manual: https://ros-industrial.github.io/ros2_canopen/manual/jazzy/
+* API reference: https://ros-industrial.github.io/ros2_canopen/api/jazzy/
+
+### Kilted
+* Manual: https://ros-industrial.github.io/ros2_canopen/manual/kilted/
+* API reference: https://ros-industrial.github.io/ros2_canopen/api/kilted/
 
 ### Humble
 * Manual: https://ros-industrial.github.io/ros2_canopen/manual/humble/

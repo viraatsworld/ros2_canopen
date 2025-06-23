@@ -1,10 +1,10 @@
-name: Documentation Iron
+name: Documentation Jazzy
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ iron ]
+    branches: [ jazzy ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -46,10 +46,10 @@ jobs:
       - name: Create commit
         run: |
             git clone https://github.com/ros-industrial/ros2_canopen.git --branch gh-pages --single-branch gh-pages
-            mkdir -p gh-pages/manual/iron/
-            mkdir -p gh-pages/api/iron/
-            cp -r ./canopen/sphinx/_build/html/* gh-pages/manual/iron/
-            cp -r ./canopen/doxygen/_build/html/* gh-pages/api/iron/
+            mkdir -p gh-pages/manual/jazzy/
+            mkdir -p gh-pages/api/jazzy/
+            cp -r ./canopen/sphinx/_build/html/* gh-pages/manual/jazzy/
+            cp -r ./canopen/doxygen/_build/html/* gh-pages/api/jazzy/
             cd gh-pages
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"

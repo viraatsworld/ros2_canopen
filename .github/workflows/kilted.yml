@@ -1,10 +1,10 @@
-name: Industiral CI Iron
+name: Industrial CI Kilted
 
 on:
   push:
-    branches: [ iron ]
+    branches: [ kilted ]
   pull_request:
-    branches: [ iron ]
+    branches: [ kilted ]
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [iron]
+        ROS_DISTRO: [kilted]
         ROS_REPO: [testing]
     env:
       CCACHE_DIR: "${{ github.workspace }}/.ccache"
@@ -31,4 +31,3 @@ jobs:
           BEFORE_INSTALL_TARGET_DEPENDENCIES: 'sudo apt-get update'
           ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
           ROS_REPO: ${{ matrix.ROS_REPO }}
-          NOT_TEST_BUILD: 1
