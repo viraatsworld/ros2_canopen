@@ -214,6 +214,7 @@ void NodeCanopenBaseDriver<NODETYPE>::activate(bool called_from_base)
     std::thread(std::bind(&NodeCanopenBaseDriver<NODETYPE>::nmt_listener, this));
   emcy_queue_ = this->lely_driver_->get_emcy_queue();
   rpdo_queue_ = this->lely_driver_->get_rpdo_queue();
+  nmt_state_queue_ = this->lely_driver_->get_nmt_state_queue();
   if (polling_)
   {
     RCLCPP_INFO(this->node_->get_logger(), "Starting with polling mode.");
@@ -243,6 +244,7 @@ void NodeCanopenBaseDriver<NODETYPE>::deactivate(bool called_from_base)
   poll_timer_->cancel();
   emcy_queue_.reset();
   rpdo_queue_.reset();
+  nmt_state_queue_.reset();
   if (diagnostic_enabled_.load())
   {
     diagnostic_updater_->removeByName("diagnostic updater");
@@ -373,20 +375,21 @@ void NodeCanopenBaseDriver<NODETYPE>::nmt_listener()
     }
     while (f.wait_for(this->non_transmit_timeout_) != std::future_status::ready)
     {
-      if (!this->activated_.load()) return;
-    }
-    try
-    {
-      auto state = f.get();
-      if (nmt_state_cb_)
+      if(!nmt_state_queue_->empty())
       {
-        nmt_state_cb_(state, this->lely_driver_->get_id());
+        // If the NMT state is set, we can just pop the first element from the queue
+        // and use it as the current state.
+        canopen::NmtState nmt_state;
+        if (nmt_state_queue_->try_pop(nmt_state))
+        {
+          if (nmt_state_cb_)
+          {
+            nmt_state_cb_(nmt_state, this->lely_driver_->get_id());
+          }
+          on_nmt(nmt_state);
+        }
       }
-      on_nmt(state);
-    }
-    catch (const std::future_error & e)
-    {
-      break;
+      if (!this->activated_.load()) return;
     }
   }
 }

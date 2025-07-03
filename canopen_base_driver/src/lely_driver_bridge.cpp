@@ -98,6 +98,8 @@ void LelyDriverBridge::OnState(canopen::NmtState state) noexcept
       nmt_state_promise.set_value(st);
     }
   }
+  
+  nmt_state_queue->push(st);
 }
 
 void LelyDriverBridge::OnBoot(canopen::NmtState st, char es, const ::std::string & what) noexcept
@@ -328,6 +330,11 @@ std::future<canopen::NmtState> LelyDriverBridge::async_request_nmt()
 std::shared_ptr<SafeQueue<COData>> LelyDriverBridge::get_rpdo_queue() { return rpdo_queue; }
 
 std::shared_ptr<SafeQueue<COEmcy>> LelyDriverBridge::get_emcy_queue() { return emcy_queue; }
+
+std::shared_ptr<SafeQueue<canopen::NmtState>> LelyDriverBridge::get_nmt_state_queue()
+{
+  return nmt_state_queue;
+}
 
 void LelyDriverBridge::tpdo_transmit(COData data)
 {

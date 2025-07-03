@@ -57,6 +57,7 @@ protected:
 
   std::shared_ptr<ros2_canopen::SafeQueue<ros2_canopen::COEmcy>> emcy_queue_;
   std::shared_ptr<ros2_canopen::SafeQueue<ros2_canopen::COData>> rpdo_queue_;
+  std::shared_ptr<ros2_canopen::SafeQueue<canopen::NmtState>> nmt_state_queue_;
   rclcpp::TimerBase::SharedPtr poll_timer_;
 
   // Diagnostic components

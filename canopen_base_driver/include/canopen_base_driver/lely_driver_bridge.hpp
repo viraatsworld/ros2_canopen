@@ -292,6 +292,7 @@ protected:
   std::promise<canopen::NmtState> nmt_state_promise;
   std::atomic<bool> nmt_state_is_set;
   std::mutex nmt_mtex;
+  std::shared_ptr<SafeQueue<canopen::NmtState>> nmt_state_queue;
 
   // RPDO synchronisation items
   std::promise<COData> rpdo_promise;
@@ -410,6 +411,7 @@ public:
     std::string bin, std::chrono::milliseconds timeout = 20ms,
     std::chrono::milliseconds boot_timeout = 20ms)
   : FiberDriver(exec, master, id),
+    nmt_state_queue(new SafeQueue<canopen::NmtState>()),
     rpdo_queue(new SafeQueue<COData>()),
     emcy_queue(new SafeQueue<COEmcy>())
   {
@@ -632,6 +634,8 @@ public:
    * The returned future is set when an RPDO event is detected.
    */
   std::shared_ptr<SafeQueue<COData>> get_rpdo_queue();
+
+  std::shared_ptr<SafeQueue<canopen::NmtState>> get_nmt_state_queue(); 
 
   /**
    * @brief Asynchronous request for EMCY
