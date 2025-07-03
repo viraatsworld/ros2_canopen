@@ -366,30 +366,26 @@ void NodeCanopenBaseDriver<NODETYPE>::remove_from_master()
 template <class NODETYPE>
 void NodeCanopenBaseDriver<NODETYPE>::nmt_listener()
 {
-  while (rclcpp::ok())
+  // wait until the driver is activated
+  while (!this->activated_.load() && rclcpp::ok())
   {
-    std::future<lely::canopen::NmtState> f;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  while (rclcpp::ok() && this->activated_.load())
+  {
+    if(!nmt_state_queue_->empty())
     {
-      std::scoped_lock<std::mutex> lock(this->driver_mutex_);
-      f = this->lely_driver_->async_request_nmt();
-    }
-    while (f.wait_for(this->non_transmit_timeout_) != std::future_status::ready)
-    {
-      if(!nmt_state_queue_->empty())
+      // If the NMT state is set, we can just pop the first element from the queue
+      // and use it as the current state.
+      canopen::NmtState nmt_state;
+      if (nmt_state_queue_->try_pop(nmt_state))
       {
-        // If the NMT state is set, we can just pop the first element from the queue
-        // and use it as the current state.
-        canopen::NmtState nmt_state;
-        if (nmt_state_queue_->try_pop(nmt_state))
+        if (nmt_state_cb_)
         {
-          if (nmt_state_cb_)
-          {
-            nmt_state_cb_(nmt_state, this->lely_driver_->get_id());
-          }
-          on_nmt(nmt_state);
+          nmt_state_cb_(nmt_state, this->lely_driver_->get_id());
         }
+        on_nmt(nmt_state);
       }
-      if (!this->activated_.load()) return;
     }
   }
 }
