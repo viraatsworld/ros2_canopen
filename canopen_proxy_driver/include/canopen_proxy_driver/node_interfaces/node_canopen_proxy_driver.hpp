@@ -39,6 +39,9 @@ protected:
   rclcpp::Service<canopen_interfaces::srv::COWrite>::SharedPtr sdo_write_service;
 
   std::mutex sdo_mtex;
+  bool nmt_state_subscription_connected_{false};
+  std_msgs::msg::String pending_nmt_state_message_;
+  bool has_pending_nmt_state_{false};
 
   virtual void on_nmt(canopen::NmtState nmt_state) override;
   virtual void on_rpdo(COData data) override;

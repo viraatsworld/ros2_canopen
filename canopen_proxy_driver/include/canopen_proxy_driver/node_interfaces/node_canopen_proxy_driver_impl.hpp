@@ -35,8 +35,32 @@ void NodeCanopenProxyDriver<NODETYPE>::init(bool called_from_base)
 template <>
 void NodeCanopenProxyDriver<rclcpp::Node>::init(bool called_from_base)
 {
+  rclcpp::PublisherOptions nmt_pub_options;
+  nmt_pub_options.event_callbacks.matched_callback =
+    [this](const rclcpp::MatchedInfo & info) {
+      if (nmt_state_subscription_connected_) {
+        if (info.current_count == 0) {
+          RCLCPP_INFO(this->node_->get_logger(), "Last nmt_state subscription is disconnected.");
+          nmt_state_subscription_connected_ = false;
+        } else {
+          RCLCPP_INFO(
+            this->node_->get_logger(),
+            "nmt_state subscription change: %d, current: %lu.",
+            info.current_count_change, info.current_count);
+        }
+      } else {
+        if (info.current_count != 0) {
+          RCLCPP_INFO(this->node_->get_logger(), "First nmt_state subscription is connected.");
+          nmt_state_subscription_connected_ = true;
+          if (has_pending_nmt_state_) {
+            nmt_state_publisher->publish(pending_nmt_state_message_);
+            has_pending_nmt_state_ = false;
+          }
+        }
+      }
+    };
   nmt_state_publisher = this->node_->create_publisher<std_msgs::msg::String>(
-    std::string(this->node_->get_name()).append("/nmt_state").c_str(), 10);
+    std::string(this->node_->get_name()).append("/nmt_state").c_str(), 10, nmt_pub_options);
   tpdo_subscriber = this->node_->create_subscription<canopen_interfaces::msg::COData>(
     std::string(this->node_->get_name()).append("/tpdo").c_str(), 10,
     std::bind(&NodeCanopenProxyDriver<rclcpp::Node>::on_tpdo, this, std::placeholders::_1));
@@ -163,7 +187,12 @@ void NodeCanopenProxyDriver<NODETYPE>::on_nmt(canopen::NmtState nmt_state)
       this->node_->get_logger(), "Slave 0x%X: Switched NMT state to %s",
       this->lely_driver_->get_id(), message.data.c_str());
 
-    nmt_state_publisher->publish(message);
+    if (nmt_state_subscription_connected_) {
+      nmt_state_publisher->publish(message);
+    } else {
+      pending_nmt_state_message_ = message;
+      has_pending_nmt_state_ = true;
+    }
   }
 }
 
