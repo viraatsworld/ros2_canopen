@@ -16,11 +16,40 @@ import os
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 import launch
+import launch_ros
+from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
+
+
+
+    master_bin_path = os.path.join(
+        get_package_share_directory("canopen_tests"),
+        "config",
+        "cia402_lifecycle",
+        "master.bin",
+    )
+    if not os.path.exists(master_bin_path):
+        master_bin_path = ""
+
+
+    # Function Begins :-
+    launch_mode = LaunchConfiguration("launch_mode")
+    launch_mode_args=DeclareLaunchArgument(
+            name="launch_mode",
+            default_value="'normal'",
+            choices=["'normal'", "'diagnostics'", "'lifecycle'",'"normal"','"diagnostics"'],
+            description="select whether simulation or joint state publisher",
+        )
+
+
+
+    #Normal Function
     slave_eds_path = os.path.join(
         get_package_share_directory("canopen_tests"), "config", "cia402", "cia402_slave.eds"
     )
@@ -37,16 +66,49 @@ def generate_launch_description():
             "node_name": "cia402_node_1",
             "slave_config": slave_eds_path,
         }.items(),
+
+        condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['normal', \"normal\",'diagnostics',\"diagnostics\",'lifecycle',\"lifecycle\"]"])),
     )
-    master_bin_path = os.path.join(
-        get_package_share_directory("canopen_tests"),
-        "config",
-        "cia402_lifecycle",
-        "master.bin",
+
+    slave_node_2 = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                os.path.join(get_package_share_directory("canopen_fake_slaves"), "launch"),
+                "/cia402_slave.launch.py",
+            ]
+        ),
+        launch_arguments={
+            "node_id": "3",
+            "node_name": "cia402_node_2",
+            "slave_config": slave_eds_path,
+        }.items(),
+
+         condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['diagnositcs',\"diagnostics\"]"])),
     )
-    if not os.path.exists(master_bin_path):
-        master_bin_path = ""
-    device_container = IncludeLaunchDescription(
+
+    slave_node_3 = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                os.path.join(get_package_share_directory("canopen_fake_slaves"), "launch"),
+                "/cia402_slave.launch.py",
+            ]
+        ),
+        launch_arguments={
+            "node_id": "4",
+            "node_name": "cia402_node_4",
+            "slave_config": slave_eds_path,
+        }.items(),
+
+        condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['diagnostics',\"diagnostics\"]"])),
+    )
+
+
+    master_bin_path=""
+
+    normal_device_container = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [
                 os.path.join(get_package_share_directory("canopen_core"), "launch"),
@@ -69,6 +131,94 @@ def generate_launch_description():
             ),
             "can_interface_name": "vcan0",
         }.items(),
+
+        condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['normal',\"normal\"]"])),
+
     )
 
-    return LaunchDescription([slave_node_1, device_container])
+
+
+    lifecycle_device_container = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                os.path.join(get_package_share_directory("canopen_core"), "launch"),
+                "/canopen.launch.py",
+            ]
+        ),
+        launch_arguments={
+            "master_config": os.path.join(
+                get_package_share_directory("canopen_tests"),
+                "config",
+                "cia402_lifecycle",
+                "master.dcf",
+            ),
+            "master_bin": master_bin_path,
+            "bus_config": os.path.join(
+                get_package_share_directory("canopen_tests"),
+                "config",
+                "cia402_lifecycle",
+                "bus.yml",
+            ),
+            "can_interface_name": "vcan0",
+        }.items(),
+
+        condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['lifecycle',\"lifecycle\"]"])),
+    )
+
+
+
+
+    #Diagnostics
+
+    diagnostics_device_container = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                os.path.join(get_package_share_directory("canopen_core"), "launch"),
+                "/canopen.launch.py",
+            ]
+        ),
+        launch_arguments={
+            "master_config": os.path.join(
+                get_package_share_directory("canopen_tests"),
+                "config",
+                "cia402_diagnostics",
+                "master.dcf",
+            ),
+            "master_bin": master_bin_path,
+            "bus_config": os.path.join(
+                get_package_share_directory("canopen_tests"),
+                "config",
+                "cia402_diagnostics",
+                "bus.yml",
+            ),
+            "can_interface_name": "vcan0",
+        }.items(),
+
+
+        condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['diagnostics',\"diagnostics\"]"])),
+
+    )
+
+
+    diagnostics_analyzer_path = os.path.join(
+        get_package_share_directory("canopen_tests"),
+        "launch",
+        "analyzers",
+        "cia402_diagnostic_analyzer.yaml",
+    )
+
+    diagnostics_aggregator_node = launch_ros.actions.Node(
+        package="diagnostic_aggregator",
+        executable="aggregator_node",
+        output="screen",
+        parameters=[diagnostics_analyzer_path],
+
+        condition=IfCondition(PythonExpression(
+                [launch_mode, " in ['diagnostics',\"diagnostics\"]"])),
+    )
+
+
+    return LaunchDescription([launch_mode_args, slave_node_1, slave_node_2,slave_node_3, normal_device_container, lifecycle_device_container,diagnostics_device_container, diagnostics_aggregator_node ])
