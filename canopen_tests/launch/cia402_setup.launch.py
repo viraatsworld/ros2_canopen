@@ -17,7 +17,7 @@ from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 import launch
 import launch_ros
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration, PythonExpression, TextSubstitution
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition
@@ -42,11 +42,10 @@ def generate_launch_description():
     launch_mode = LaunchConfiguration("launch_mode")
     launch_mode_args=DeclareLaunchArgument(
             name="launch_mode",
-            default_value="'normal'",
-            choices=["'normal'", "'diagnostics'", "'lifecycle'",'"normal"','"diagnostics"'],
+            default_value=TextSubstitution(text='normal'),
+            choices= ['normal','diagnostics','lifecycle'],
             description="select whether simulation or joint state publisher",
         )
-
 
 
     #Normal Function
@@ -67,8 +66,12 @@ def generate_launch_description():
             "slave_config": slave_eds_path,
         }.items(),
 
-        condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['normal', \"normal\",'diagnostics',\"diagnostics\",'lifecycle',\"lifecycle\"]"])),
+       condition= IfCondition(PythonExpression([
+    "'", launch_mode, "' == 'diagnostics' or '",
+    launch_mode, "' == 'lifecycle' or '",
+    launch_mode, "' == 'normal'"
+])),
+
     )
 
     slave_node_2 = IncludeLaunchDescription(
@@ -84,8 +87,10 @@ def generate_launch_description():
             "slave_config": slave_eds_path,
         }.items(),
 
-         condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['diagnositcs',\"diagnostics\"]"])),
+               condition=IfCondition(PythonExpression([
+            "'", launch_mode, "' == 'diagnostics'"
+        ])),
+
     )
 
     slave_node_3 = IncludeLaunchDescription(
@@ -101,8 +106,9 @@ def generate_launch_description():
             "slave_config": slave_eds_path,
         }.items(),
 
-        condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['diagnostics',\"diagnostics\"]"])),
+       condition=IfCondition(PythonExpression([
+            "'", launch_mode, "' == 'diagnostics'"
+        ])),
     )
 
 
@@ -132,8 +138,9 @@ def generate_launch_description():
             "can_interface_name": "vcan0",
         }.items(),
 
-        condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['normal',\"normal\"]"])),
+        condition=IfCondition(PythonExpression([
+            "'", launch_mode, "' == 'normal'"
+        ])),
 
     )
 
@@ -163,8 +170,9 @@ def generate_launch_description():
             "can_interface_name": "vcan0",
         }.items(),
 
-        condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['lifecycle',\"lifecycle\"]"])),
+        condition=IfCondition(PythonExpression([
+            "'", launch_mode, "' == 'lifecycle'"
+        ])),
     )
 
 
@@ -197,9 +205,9 @@ def generate_launch_description():
         }.items(),
 
 
-        condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['diagnostics',\"diagnostics\"]"])),
-
+condition=IfCondition(PythonExpression([
+            "'", launch_mode, "' == 'diagnostics'"
+        ])),
     )
 
 
@@ -216,9 +224,9 @@ def generate_launch_description():
         output="screen",
         parameters=[diagnostics_analyzer_path],
 
-        condition=IfCondition(PythonExpression(
-                [launch_mode, " in ['diagnostics',\"diagnostics\"]"])),
-    )
+condition=IfCondition(PythonExpression([
+            "'", launch_mode, "' == 'diagnostics'"
+        ])),    )
 
 
     return LaunchDescription([launch_mode_args, slave_node_1, slave_node_2,slave_node_3, normal_device_container, lifecycle_device_container,diagnostics_device_container, diagnostics_aggregator_node ])
