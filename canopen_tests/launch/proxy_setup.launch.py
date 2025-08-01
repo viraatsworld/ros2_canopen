@@ -16,6 +16,7 @@ from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 import launch
 import launch_ros
+from launch.actions import TimerAction
 from launch.substitutions import LaunchConfiguration, PythonExpression, TextSubstitution
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
@@ -26,9 +27,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
 
 
-    launch_mode = LaunchConfiguration("launch_mode")
-    launch_mode_args=DeclareLaunchArgument(
-            name="launch_mode",
+    mode = LaunchConfiguration("mode")
+    mode_args=DeclareLaunchArgument(
+            name="mode",
             default_value=TextSubstitution(text='normal'),
             choices= ['normal','diagnostics','lifecycle'],
             description="select whether simulation or joint state publisher",
@@ -52,8 +53,8 @@ def generate_launch_description():
             "slave_config": normal_slave_eds_path,
         }.items(),
         condition= IfCondition(PythonExpression([
-    "'", launch_mode, "' == 'diagnostics' or '",
-    launch_mode, "' == 'normal'"
+    "'", mode, "' == 'diagnostics' or '",
+    mode, "' == 'normal'"
         ])),
 
     )
@@ -71,8 +72,8 @@ def generate_launch_description():
             "slave_config": normal_slave_eds_path,
         }.items(),
         condition= IfCondition(PythonExpression([
-    "'", launch_mode, "' == 'diagnostics' or '",
-    launch_mode, "' == 'normal'"
+    "'", mode, "' == 'diagnostics' or '",
+    mode, "' == 'normal'"
         ])),
 
     )
@@ -103,11 +104,18 @@ def generate_launch_description():
         }.items(),
 
         condition= IfCondition(PythonExpression([
-    "'",launch_mode, "' == 'normal'"
+    "'",mode, "' == 'normal'"
         ])),
     )
 
-
+    # Delay master start by 3 seconds
+    delayed_normal_device_container = TimerAction(
+        period=3.0,
+        actions=[normal_device_container],
+        condition=IfCondition(PythonExpression([
+            "'", mode, "' == 'normal'"
+        ])),
+    )
 
 
 
@@ -130,7 +138,7 @@ def generate_launch_description():
             "slave_config": lifecycle_slave_eds_path,
         }.items(),
                 condition= IfCondition(PythonExpression([
-    "'", launch_mode, "' == 'lifecycle'"
+    "'", mode, "' == 'lifecycle'"
         ])),
     )
 
@@ -147,7 +155,7 @@ def generate_launch_description():
             "slave_config": lifecycle_slave_eds_path,
         }.items(),
                 condition= IfCondition(PythonExpression([
-    "'", launch_mode, "' == 'lifecycle'"
+    "'", mode, "' == 'lifecycle'"
         ])),
     )
 
@@ -178,7 +186,16 @@ def generate_launch_description():
         }.items(),
 
         condition= IfCondition(PythonExpression([
-            "'", launch_mode, "' == 'lifecycle'"
+            "'", mode, "' == 'lifecycle'"
+        ])),
+    )
+
+        # Delay master start by 3 seconds
+    delayed_lifecycle_device_container = TimerAction(
+        period=3.0,
+        actions=[lifecycle_device_container],
+        condition=IfCondition(PythonExpression([
+            "'", mode, "' == 'lifecycle'"
         ])),
     )
 
@@ -209,7 +226,16 @@ def generate_launch_description():
         }.items(),
 
         condition= IfCondition(PythonExpression([
-    "'", launch_mode, "' == 'diagnostics'"
+    "'", mode, "' == 'diagnostics'"
+        ])),
+    )
+
+    # Delay master start by 3 seconds -to bootup slave nodes
+    delayed_diagnostic_device_container = TimerAction(
+        period=3.0,
+        actions=[diagnostic_device_container],
+        condition=IfCondition(PythonExpression([
+            "'", mode, "' == 'diagnostics'"
         ])),
     )
 
@@ -226,7 +252,7 @@ def generate_launch_description():
         output="screen",
         parameters=[diagnostics_analyzer_path],
                 condition= IfCondition(PythonExpression([
-    "'",launch_mode, "' == 'diagnostics'"
+    "'",mode, "' == 'diagnostics'"
         ])),
     )
 
@@ -240,4 +266,4 @@ def generate_launch_description():
         )
     )
 
-    return LaunchDescription([launch_mode_args,slave_node_1, slave_node_2, normal_device_container,slave_node_3, slave_node_4, lifecycle_device_container, diagnostic_device_container, diagnostics_aggregator_node])
+    return LaunchDescription([mode_args,slave_node_1, slave_node_2, delayed_normal_device_container,slave_node_3, slave_node_4, delayed_lifecycle_device_container, delayed_diagnostic_device_container, diagnostics_aggregator_node])
