@@ -14,6 +14,7 @@
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import TimerAction
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -51,6 +52,14 @@ def generate_launch_description():
         parameters=[robot_description, robot_control_config],
         output="screen",
     )
+
+            # Delay master start by 3 seconds
+    delayed_control_node = TimerAction(
+        period=3.0,
+        actions=[control_node],
+    )
+
+
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -112,7 +121,7 @@ def generate_launch_description():
     nodes_to_start = [
         # slave_node_2,
         # slave_node_1,
-        control_node,
+        delayed_control_node,
         joint_state_broadcaster_spawner,
         # robot_controller_spawner,
         forward_position_controller_spawner,
