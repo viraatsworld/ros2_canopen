@@ -32,6 +32,7 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import OpaqueFunction
+from launch.actions import TimerAction
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -119,6 +120,13 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
+    #add a delay to allow slaves to spawn first
+    delayed_control_node = TimerAction(
+    period=5.0,  # Delay in seconds (adjust as needed)
+    actions=[control_node],
+        )
+
+
     # load one controller just to make sure it can connect to controller_manager
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -166,11 +174,11 @@ def launch_setup(context, *args, **kwargs):
     )
 
     nodes_to_start = [
-        control_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         slave_node_1,
         slave_node_2,
+        delayed_control_node,
         canopen_proxy_controller_spawner,
     ]
 
