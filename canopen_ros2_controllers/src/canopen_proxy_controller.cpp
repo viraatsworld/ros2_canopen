@@ -138,19 +138,26 @@ controller_interface::CallbackReturn CanopenProxyController::on_configure(
                               const std_srvs::srv::Trigger::Request::SharedPtr request,
                               std_srvs::srv::Trigger::Response::SharedPtr response)
   {
-    command_interfaces_[CommandInterfaces::NMT_RESET].set_value(kCommandValue);
+    if(!command_interfaces_[CommandInterfaces::NMT_RESET].set_value(kCommandValue)){
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to reset NMT_RESET command value");    }
 
-    while (!std::isnan(command_interfaces_[CommandInterfaces::NMT_RESET].get_value()))
+    while(true)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(kLoopPeriodMS));
+        auto optional_value = command_interfaces_[CommandInterfaces::NMT_RESET].get_optional();
+        if (!optional_value.has_value() || std::isnan(optional_value.value()))
+        break;  // exit the loop if value is NaN or not set
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(kLoopPeriodMS));
     }
 
     // report success
     response->success =
-      static_cast<bool>(command_interfaces_[CommandInterfaces::NMT_RESET_FBK].get_value());
+      static_cast<bool>(command_interfaces_[CommandInterfaces::NMT_RESET_FBK].get_optional().value_or(0.0));
     // reset to nan
-    command_interfaces_[CommandInterfaces::NMT_RESET_FBK].set_value(
-      std::numeric_limits<double>::quiet_NaN());
+    if(!command_interfaces_[CommandInterfaces::NMT_RESET_FBK].set_value(
+      std::numeric_limits<double>::quiet_NaN())){
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to reset feedback NMT_RESET_FBK command value");
+      }
   };
 
   auto service_profile = rclcpp::QoS(1);
@@ -163,19 +170,32 @@ controller_interface::CallbackReturn CanopenProxyController::on_configure(
                               const std_srvs::srv::Trigger::Request::SharedPtr request,
                               std_srvs::srv::Trigger::Response::SharedPtr response)
   {
-    command_interfaces_[CommandInterfaces::NMT_START].set_value(kCommandValue);
-
-    while (!std::isnan(command_interfaces_[CommandInterfaces::NMT_START].get_value()))
+    if(!command_interfaces_[CommandInterfaces::NMT_START].set_value(kCommandValue))
     {
+       RCLCPP_WARN(get_node()->get_logger(), "Failed to set NMT_START command value");
+    }
+
+    while(true){
+        auto optional_value = command_interfaces_[CommandInterfaces::NMT_START].get_optional();
+        if (!optional_value.has_value() || std::isnan(optional_value.value()))
+        {
+        break;
+        }
       std::this_thread::sleep_for(std::chrono::milliseconds(kLoopPeriodMS));
+
     }
 
     // report success
     response->success =
-      static_cast<bool>(command_interfaces_[CommandInterfaces::NMT_START_FBK].get_value());
+      static_cast<bool>(command_interfaces_[CommandInterfaces::NMT_START_FBK].get_optional().value_or(0.0));
+
+
     // reset to nan
-    command_interfaces_[CommandInterfaces::NMT_START_FBK].set_value(
-      std::numeric_limits<double>::quiet_NaN());
+    if(!command_interfaces_[CommandInterfaces::NMT_START_FBK].set_value(
+      std::numeric_limits<double>::quiet_NaN()))
+      {
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to set Feedback NMT_START_FBK command value");
+      }
   };
   nmt_state_start_service_ = get_node()->create_service<ControllerStartResetSrvType>(
     "~/nmt_start_node", on_nmt_state_start, service_profile);
@@ -254,7 +274,10 @@ controller_interface::CallbackReturn CanopenProxyController::on_deactivate(
   // instead of a loop
   for (size_t i = 0; i < command_interfaces_.size(); ++i)
   {
-    command_interfaces_[i].set_value(std::numeric_limits<double>::quiet_NaN());
+    if(!command_interfaces_[i].set_value(std::numeric_limits<double>::quiet_NaN()))
+    {
+      RCLCPP_WARN(get_node()->get_logger(), "Failed to set command interface %zu to NaN", i);
+    }
   }
   return controller_interface::CallbackReturn::SUCCESS;
 }
@@ -266,8 +289,12 @@ controller_interface::return_type CanopenProxyController::update(
   if (nmt_state_rt_publisher_)
   {
     auto message = std_msgs::msg::String();
-    auto nmt_state = static_cast<int>(state_interfaces_[StateInterfaces::NMT_STATE].get_value());
+    auto nmt_state_optional=state_interfaces_[StateInterfaces::NMT_STATE].get_optional();
 
+    if(nmt_state_optional) // Only proceed if a value is present
+
+    {
+    auto nmt_state = static_cast<int>(nmt_state_optional.value());
     switch (static_cast<canopen::NmtState>(nmt_state))
     {
       case canopen::NmtState::BOOTUP:
@@ -296,6 +323,10 @@ controller_interface::return_type CanopenProxyController::update(
         message.data = "ERROR";
         break;
     }
+    }
+    else{
+      RCLCPP_WARN(get_node()->get_logger(), "NMT_STATE interface value is not available yet.");
+    }
 
     if (nmt_state_actual_ != message.data && nmt_state_rt_publisher_->trylock())
     {
@@ -309,12 +340,19 @@ controller_interface::return_type CanopenProxyController::update(
   // exposing rpdo data via real-time publisher
   if (rpdo_rt_publisher_ && rpdo_rt_publisher_->trylock())
   {
-    rpdo_rt_publisher_->msg_.index =
-      static_cast<uint16_t>(state_interfaces_[StateInterfaces::RPDO_INDEX].get_value());
-    rpdo_rt_publisher_->msg_.subindex =
-      static_cast<uint8_t>(state_interfaces_[StateInterfaces::RPDO_SUBINDEX].get_value());
-    rpdo_rt_publisher_->msg_.data =
-      static_cast<uint32_t>(state_interfaces_[StateInterfaces::RPDO_DATA].get_value());
+    auto index_optional=state_interfaces_[StateInterfaces::RPDO_INDEX].get_optional();
+    auto subindex_optional=state_interfaces_[StateInterfaces::RPDO_SUBINDEX].get_optional();
+    auto data_optional=state_interfaces_[StateInterfaces::RPDO_DATA].get_optional();
+
+    if (index_optional.has_value() && subindex_optional.has_value() && data_optional.has_value()){
+
+        rpdo_rt_publisher_->msg_.index = static_cast<uint16_t>(index_optional.value());
+        rpdo_rt_publisher_->msg_.subindex = static_cast<uint8_t>(subindex_optional.value());
+        rpdo_rt_publisher_->msg_.data = static_cast<uint32_t>(data_optional.value());
+    }
+    else{
+          RCLCPP_WARN(get_node()->get_logger(),"RPDO state interfaces have invalid/uninitialized values.");
+    }
 
     rpdo_rt_publisher_->unlockAndPublish();
   }
@@ -327,14 +365,26 @@ controller_interface::return_type CanopenProxyController::update(
   }
   else if (propagate_controller_command_msg(*current_cmd))
   {
-    command_interfaces_[CommandInterfaces::TPDO_INDEX].set_value(
-      static_cast<double>((*current_cmd)->index));
-    command_interfaces_[CommandInterfaces::TPDO_SUBINDEX].set_value(
-      static_cast<double>((*current_cmd)->subindex));
-    command_interfaces_[CommandInterfaces::TPDO_DATA].set_value(
-      static_cast<double>((*current_cmd)->data));
+    if(!command_interfaces_[CommandInterfaces::TPDO_INDEX].set_value(
+      static_cast<double>((*current_cmd)->index)))
+      {
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to set TPDO_INDEX");
+      }
+    if(!command_interfaces_[CommandInterfaces::TPDO_SUBINDEX].set_value(
+      static_cast<double>((*current_cmd)->subindex)))
+      {
+          RCLCPP_WARN(get_node()->get_logger(), "Failed to set TPDO_SUBINDEX");
+      }
+    if(!command_interfaces_[CommandInterfaces::TPDO_DATA].set_value(
+      static_cast<double>((*current_cmd)->data)))
+      {
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to set TPDO_DATA");
+      }
     // tpdo data one shot mechanism
-    command_interfaces_[CommandInterfaces::TPDO_ONS].set_value(kCommandValue);
+    if(!command_interfaces_[CommandInterfaces::TPDO_ONS].set_value(kCommandValue))
+    {
+          RCLCPP_WARN(get_node()->get_logger(), "Failed to set TPDO_ONS");
+    }
 
     *(input_cmd_.readFromRT()) = nullptr;
   }
