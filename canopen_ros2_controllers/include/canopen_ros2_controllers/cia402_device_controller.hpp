@@ -97,18 +97,34 @@ protected:
           const std_srvs::srv::Trigger::Request::SharedPtr request,
           std_srvs::srv::Trigger::Response::SharedPtr response)
         {
-          command_interfaces_[cmd].set_value(kCommandValue);
-
-          while (std::isnan(command_interfaces_[fbk].get_value()) && rclcpp::ok())
+          if (!command_interfaces_[cmd].set_value(kCommandValue))
           {
+            RCLCPP_WARN(get_node()->get_logger(), "Failed to set command value for interface %d", cmd);
+          }
+
+          while(rclcpp::ok()){
+
+            auto optional_value=command_interfaces_[fbk].get_optional();
+
+            if(optional_value.has_value() && !std::isnan(optional_value.value()))
+             {
+              break;
+             }
+
             std::this_thread::sleep_for(std::chrono::milliseconds(kLoopPeriodMS));
+
           }
 
           // report success
-          response->success = static_cast<bool>(command_interfaces_[fbk].get_value());
+          response->success = static_cast<bool>(command_interfaces_[fbk].get_optional().value_or(0.0));
           // reset to nan
-          command_interfaces_[fbk].set_value(std::numeric_limits<double>::quiet_NaN());
-          command_interfaces_[cmd].set_value(std::numeric_limits<double>::quiet_NaN());
+          if (!command_interfaces_[fbk].set_value(std::numeric_limits<double>::quiet_NaN()))
+          {
+             RCLCPP_WARN(get_node()->get_logger(), "Failed to set feedback value to NaN");
+          }
+          if (!command_interfaces_[cmd].set_value(std::numeric_limits<double>::quiet_NaN())) {
+             RCLCPP_WARN(get_node()->get_logger(), "Failed to set command value to NaN");
+            }
         },
         service_profile);
 
