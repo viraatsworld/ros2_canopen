@@ -23,6 +23,7 @@ from canopen_interfaces.msg import COData
 
 class TestNode(Node):
     __test__ = False  # Prevent pytest from trying to collect this class
+
     def __init__(self, name="test_node"):
         super().__init__(name)
 

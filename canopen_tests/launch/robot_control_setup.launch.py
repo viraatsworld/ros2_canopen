@@ -53,13 +53,11 @@ def generate_launch_description():
         output="screen",
     )
 
-            # Delay master start by 3 seconds
+    # Delay master start by 3 seconds
     delayed_control_node = TimerAction(
         period=3.0,
         actions=[control_node],
     )
-
-
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",

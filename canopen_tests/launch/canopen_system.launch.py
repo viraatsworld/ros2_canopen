@@ -30,8 +30,20 @@
 # Author: Lovro Ivanov lovro.ivanov@gmail.com
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction, TimerAction, IncludeLaunchDescription
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, TextSubstitution, PythonExpression
+from launch.actions import (
+    DeclareLaunchArgument,
+    OpaqueFunction,
+    TimerAction,
+    IncludeLaunchDescription,
+)
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    TextSubstitution,
+    PythonExpression,
+)
 from launch_ros.substitutions import FindPackageShare
 from launch.conditions import IfCondition
 from launch_ros.actions import Node
@@ -43,14 +55,13 @@ def launch_setup(context, *args, **kwargs):
     name = LaunchConfiguration("name")
     prefix = LaunchConfiguration("prefix")
 
-    #launch mode canopen_system or cia402_system
+    # launch mode canopen_system or cia402_system
     mode = LaunchConfiguration("mode")
-
 
     # bus configuration
     bus_config_package = LaunchConfiguration("bus_config_package")
-    #dynamically set based on mode
-    config_directory =  PathJoinSubstitution(["config", mode])
+    # dynamically set based on mode
+    config_directory = PathJoinSubstitution(["config", mode])
     bus_config_file = LaunchConfiguration("bus_config_file")
     # bus configuration file full path
     bus_config = PathJoinSubstitution(
@@ -73,7 +84,7 @@ def launch_setup(context, *args, **kwargs):
 
     # Setting urdf based on mode
     string_mode = LaunchConfiguration("mode").perform(context)
-    description_file =  f"{string_mode}.urdf.xacro"
+    description_file = f"{string_mode}.urdf.xacro"
 
     robot_description_content = Command(
         [
@@ -122,11 +133,11 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    #add a delay to allow slaves to spawn first
+    # add a delay to allow slaves to spawn first
     delayed_control_node = TimerAction(
-    period=5.0,  # Delay in seconds (adjust as needed)
-    actions=[control_node],
-        )
+        period=5.0,  # Delay in seconds (adjust as needed)
+        actions=[control_node],
+    )
 
     # load one controller just to make sure it can connect to controller_manager
     joint_state_broadcaster_spawner = Node(
@@ -139,28 +150,21 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         arguments=["node_1_controller", "--controller-manager", "/controller_manager"],
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'canopen_system'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'canopen_system'"])),
     )
-
 
     cia402_device_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["cia402_device_1_controller", "--controller-manager", "/controller_manager"],
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'cia402_system'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'cia402_system'"])),
     )
 
     forward_position_controller = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["forward_position_controller", "--controller-manager", "/controller_manager"],
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'cia402_system'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'cia402_system'"])),
     )
 
     robot_state_publisher_node = Node(
@@ -193,9 +197,7 @@ def launch_setup(context, *args, **kwargs):
             "node_name": "slave_node_2",
             "slave_config": canopen_system_slave_config,
         }.items(),
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'canopen_system'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'canopen_system'"])),
     )
 
     slave_node_2 = IncludeLaunchDescription(
@@ -205,12 +207,10 @@ def launch_setup(context, *args, **kwargs):
             "node_name": "slave_node_3",
             "slave_config": canopen_system_slave_config,
         }.items(),
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'canopen_system'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'canopen_system'"])),
     )
 
-    #cia402system
+    # cia402system
     slave_node_3 = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(cia402_system_slave_launch),
         launch_arguments={
@@ -218,9 +218,7 @@ def launch_setup(context, *args, **kwargs):
             "node_name": "cia402_node_1",
             "slave_config": cia402_system_slave_config,
         }.items(),
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'cia402_system'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'cia402_system'"])),
     )
 
     nodes_to_start = [
@@ -262,9 +260,8 @@ def generate_launch_description():
             name="mode",
             default_value=TextSubstitution(text="canopen_system"),
             choices=["canopen_system", "cia402_system"],
-            description="Select system mode"
+            description="Select system mode",
         ),
-
     )
     declared_arguments.append(
         DeclareLaunchArgument(

@@ -27,8 +27,6 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
 
-
-
     master_bin_path = os.path.join(
         get_package_share_directory("canopen_tests"),
         "config",
@@ -38,18 +36,16 @@ def generate_launch_description():
     if not os.path.exists(master_bin_path):
         master_bin_path = ""
 
-
     # Function Begins :-
     mode = LaunchConfiguration("mode")
-    mode_args=DeclareLaunchArgument(
-            name="mode",
-            default_value=TextSubstitution(text='normal'),
-            choices= ['normal','diagnostics','lifecycle'],
-            description="select whether simulation or joint state publisher",
-        )
+    mode_args = DeclareLaunchArgument(
+        name="mode",
+        default_value=TextSubstitution(text="normal"),
+        choices=["normal", "diagnostics", "lifecycle"],
+        description="select whether simulation or joint state publisher",
+    )
 
-
-    #Normal Function
+    # Normal Function
     slave_eds_path = os.path.join(
         get_package_share_directory("canopen_tests"), "config", "cia402", "cia402_slave.eds"
     )
@@ -66,13 +62,19 @@ def generate_launch_description():
             "node_name": "cia402_node_1",
             "slave_config": slave_eds_path,
         }.items(),
-
-       condition= IfCondition(PythonExpression([
-    "'", mode, "' == 'diagnostics' or '",
-    mode, "' == 'lifecycle' or '",
-    mode, "' == 'normal'"
-])),
-
+        condition=IfCondition(
+            PythonExpression(
+                [
+                    "'",
+                    mode,
+                    "' == 'diagnostics' or '",
+                    mode,
+                    "' == 'lifecycle' or '",
+                    mode,
+                    "' == 'normal'",
+                ]
+            )
+        ),
     )
 
     slave_node_2 = IncludeLaunchDescription(
@@ -87,11 +89,7 @@ def generate_launch_description():
             "node_name": "cia402_node_2",
             "slave_config": slave_eds_path,
         }.items(),
-
-               condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'diagnostics'"
-        ])),
-
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'diagnostics'"])),
     )
 
     slave_node_3 = IncludeLaunchDescription(
@@ -106,14 +104,10 @@ def generate_launch_description():
             "node_name": "cia402_node_4",
             "slave_config": slave_eds_path,
         }.items(),
-
-       condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'diagnostics'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'diagnostics'"])),
     )
 
-
-    master_bin_path=""
+    master_bin_path = ""
 
     normal_device_container = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -138,14 +132,8 @@ def generate_launch_description():
             ),
             "can_interface_name": "vcan0",
         }.items(),
-
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'normal'"
-        ])),
-
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'normal'"])),
     )
-
-
 
     lifecycle_device_container = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -170,16 +158,10 @@ def generate_launch_description():
             ),
             "can_interface_name": "vcan0",
         }.items(),
-
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'lifecycle'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'lifecycle'"])),
     )
 
-
-
-
-    #Diagnostics
+    # Diagnostics
 
     diagnostics_device_container = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -204,22 +186,15 @@ def generate_launch_description():
             ),
             "can_interface_name": "vcan0",
         }.items(),
-
-
-condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'diagnostics'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'diagnostics'"])),
     )
 
     # Delay master start by 3 seconds
     delayed_diagnostics_device_container = TimerAction(
         period=3.0,
         actions=[diagnostics_device_container],
-        condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'diagnostics'"
-        ])),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'diagnostics'"])),
     )
-
 
     diagnostics_analyzer_path = os.path.join(
         get_package_share_directory("canopen_tests"),
@@ -233,10 +208,18 @@ condition=IfCondition(PythonExpression([
         executable="aggregator_node",
         output="screen",
         parameters=[diagnostics_analyzer_path],
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'diagnostics'"])),
+    )
 
-condition=IfCondition(PythonExpression([
-            "'", mode, "' == 'diagnostics'"
-        ])),    )
-
-
-    return LaunchDescription([mode_args, slave_node_1, slave_node_2,slave_node_3, normal_device_container, lifecycle_device_container,delayed_diagnostics_device_container, diagnostics_aggregator_node ])
+    return LaunchDescription(
+        [
+            mode_args,
+            slave_node_1,
+            slave_node_2,
+            slave_node_3,
+            normal_device_container,
+            lifecycle_device_container,
+            delayed_diagnostics_device_container,
+            diagnostics_aggregator_node,
+        ]
+    )

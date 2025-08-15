@@ -8,16 +8,16 @@ Service Interface
 ---------------------
 
 
-The launch file supports three modes of operation, controlled via the `launch_mode` argument:
+The launch file supports three modes of operation, controlled via the ``launch_mode`` argument:
 
 1. **Normal** (default)
 2. **Lifecycle**
 3. **Diagnostics**
 
 Normal Mode (default)
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
-This is the default mode used when no `mode` is specified.
+This is the default mode used when no ``mode`` is specified.
 
 .. code-block:: bash
 
@@ -61,12 +61,12 @@ These launch files uses ROS 2 Control with a simulated robot defined in a XACRO-
 
 
 CANopen System Setup
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
-You can launch either the proxy CANopen system or the CiA402 drivers control system with a `mode` argument.
+You can launch either the proxy CANopen system or the CiA402 drivers control system with a ``mode`` argument.
 
 Proxy CANopen System (default)
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -76,7 +76,7 @@ Proxy CANopen System (default)
 
 
 CiA402 Motion Control System
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 

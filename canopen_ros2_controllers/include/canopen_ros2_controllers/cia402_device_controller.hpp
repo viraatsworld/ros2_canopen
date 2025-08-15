@@ -99,32 +99,34 @@ protected:
         {
           if (!command_interfaces_[cmd].set_value(kCommandValue))
           {
-            RCLCPP_WARN(get_node()->get_logger(), "Failed to set command value for interface %d", cmd);
+            RCLCPP_WARN(
+              get_node()->get_logger(), "Failed to set command value for interface %d", cmd);
           }
 
-          while(rclcpp::ok()){
+          while (rclcpp::ok())
+          {
+            auto optional_value = command_interfaces_[fbk].get_optional();
 
-            auto optional_value=command_interfaces_[fbk].get_optional();
-
-            if(optional_value.has_value() && !std::isnan(optional_value.value()))
-             {
+            if (optional_value.has_value() && !std::isnan(optional_value.value()))
+            {
               break;
-             }
+            }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(kLoopPeriodMS));
-
           }
 
           // report success
-          response->success = static_cast<bool>(command_interfaces_[fbk].get_optional().value_or(0.0));
+          response->success =
+            static_cast<bool>(command_interfaces_[fbk].get_optional().value_or(0.0));
           // reset to nan
           if (!command_interfaces_[fbk].set_value(std::numeric_limits<double>::quiet_NaN()))
           {
-             RCLCPP_WARN(get_node()->get_logger(), "Failed to set feedback value to NaN");
+            RCLCPP_WARN(get_node()->get_logger(), "Failed to set feedback value to NaN");
           }
-          if (!command_interfaces_[cmd].set_value(std::numeric_limits<double>::quiet_NaN())) {
-             RCLCPP_WARN(get_node()->get_logger(), "Failed to set command value to NaN");
-            }
+          if (!command_interfaces_[cmd].set_value(std::numeric_limits<double>::quiet_NaN()))
+          {
+            RCLCPP_WARN(get_node()->get_logger(), "Failed to set command value to NaN");
+          }
         },
         service_profile);
 
